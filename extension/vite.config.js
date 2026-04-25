@@ -9,7 +9,7 @@ export default defineConfig({
       input: {
         popup: 'index.html',
         background: 'src/background/background.js',
-        content: 'src/content/content.js',
+        content: 'src/content/content.jsx',
         offscreen: 'src/offscreen/offscreen.html'
       },
       output: {

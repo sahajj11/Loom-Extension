@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Capital Compute Recorder",
   "version": "1.0",
-  "description": "Loom-style screen and camera recorder built for Capital Compute Technologies.",
+  "description": "Loom-style screen and camera recorder built with React.",
   "permissions": [
     "storage",
     "tabs",

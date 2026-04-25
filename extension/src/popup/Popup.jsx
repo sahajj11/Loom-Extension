@@ -1,6 +1,6 @@
 /* global chrome */
-import { useState } from 'react';
-import './popup.css';
+import  { useState } from 'react';
+
 
 const Popup = () => {
   const [recording, setRecording] = useState(false);

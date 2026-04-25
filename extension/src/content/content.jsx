@@ -1,6 +1,8 @@
 /* global chrome */
+
 import ReactDOM from 'react-dom/client';
-import Bubble from './Bubble';
+import Bubble from './Buble';
+
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.action === "RENDER_BUBBLE") {
