@@ -1,14 +1,61 @@
 "use client";
 
+import { supabase } from '@/lib/supabase';
 import { Suspense, useEffect, useState } from 'react';
 
 function PreviewContent() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [timestamp, setTimestamp] = useState<string | null>(null);
+  const [copied,setCopied]=useState<string | null>(null)
 
   const [isSaving, setIsSaving] = useState(false);
 const [isSaved, setIsSaved] = useState(false);
+
+const [isSharing, setIsSharing] = useState(false);
+const [shareUrl, setShareUrl] = useState<string | null>(null);
+
+
+
+const handleShare = async () => {
+  if (!videoUrl) return;
+  setIsSharing(true);
+
+  try {
+    // 1. Convert Base64 to Blob
+    const response = await fetch(videoUrl);
+    const blob = await response.blob();
+    const fileName = `rec-${Date.now()}.webm`;
+
+    // 2. Upload to Supabase Storage (Assumes a bucket named 'recordings')
+    const { data, error } = await supabase.storage
+      .from('recordings')
+      .upload(fileName, blob, {
+        contentType: 'video/webm',
+        cacheControl: '3600',
+      });
+
+    if (error) throw error;
+
+    // 3. Get Public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('recordings')
+      .getPublicUrl(fileName);
+
+    // 4. Copy to clipboard
+    await navigator.clipboard.writeText(publicUrl);
+    setShareUrl(publicUrl);
+    alert("Public link copied to clipboard!");
+
+    
+    
+  } catch (err) {
+    console.error("Sharing failed:", err);
+    alert("Check your Supabase bucket permissions (set to public).");
+  } finally {
+    setIsSharing(false);
+  }
+};
 
 // const handleSave = async () => {
 //   if (!videoUrl) return;
@@ -93,9 +140,7 @@ const handleSave = async () => {
             <span className="text-xl font-bold tracking-tight text-slate-800">Capital Capture</span>
           </div>
           <div className="flex gap-3">
-             <button className="px-5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
-              Discard
-            </button>
+            
            <button 
   onClick={handleSave}
   disabled={isSaving || isSaved || !videoUrl}
@@ -119,6 +164,51 @@ const handleSave = async () => {
     </>
   )}
 </button>
+
+{shareUrl && (
+    <div className="animate-in fade-in slide-in-from-top-4 duration-500 p-4 rounded-2xl bg-violet-50 border border-violet-100 flex flex-col md:flex-row items-center gap-4">
+      <div className="flex-1 w-full">
+        <p className="text-[10px] uppercase tracking-widest font-bold text-violet-400 mb-1 ml-1">Public Share Link</p>
+        <div className="relative group w-full">
+          <input 
+            readOnly 
+            value={shareUrl} 
+            className="w-full bg-white border border-violet-200 rounded-lg px-4 py-2.5 text-sm text-slate-600 outline-none focus:ring-2 focus:ring-violet-500/20"
+          />
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText(shareUrl);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="absolute right-2 top-1.5 px-3 py-1 bg-violet-600 text-white text-xs rounded-md font-bold hover:bg-violet-700 transition-colors"
+          >
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
+      </div>
+      <div className="hidden md:block h-10 w-px bg-violet-200 mx-2" />
+      <div className="flex flex-col items-start">
+       
+       
+      </div>
+    </div>
+  )}
+
+<button 
+    onClick={handleShare}
+    disabled={isSharing}
+    className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold bg-white border-2 border-violet-100 text-violet-600 rounded-xl hover:bg-violet-50 transition-all shadow-sm disabled:opacity-50"
+  >
+    {isSharing ? (
+      <div className="w-4 h-4 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+    ) : (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+      </svg>
+    )}
+    {isSharing ? "Uploading..." : "Get Shareable Link"}
+  </button>
           </div>
         </nav>
 
