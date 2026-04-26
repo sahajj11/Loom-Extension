@@ -1,4 +1,4 @@
-# Capital Capture 🚀
+# Capital Capture 
 
 **Capital Capture** is a high-performance, AI-native Chrome extension designed to provide a seamless screen and webcam recording experience—built to resemble and exceed the core utility of platforms like Loom.
 
