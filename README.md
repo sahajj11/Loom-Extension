@@ -23,6 +23,12 @@
 
 ---
 
+## 📂 Project Structure
+- `/extension`: The Chrome extension source code (React + Vite).
+- `/web-app`: The Next.js 14 preview dashboard.
+
+---
+
 ## 🚀 Getting Started
 
 ### 1. Extension Installation
